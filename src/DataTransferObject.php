@@ -1,18 +1,18 @@
 <?php
 
 
-namespace IsakzhanovR\DataTransferObjects;
+namespace IsakzhanovR\DataTransferObject;
 
 
 use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
-use IsakzhanovR\DataTransferObjects\Exceptions\DataTransferException;
-use IsakzhanovR\DataTransferObjects\Exceptions\TypeErrorException;
-use IsakzhanovR\DataTransferObjects\Exceptions\UnknownTypePropertyException;
-use IsakzhanovR\DataTransferObjects\Helpers\Types;
-use IsakzhanovR\DataTransferObjects\Traits\StaticDTO;
+use IsakzhanovR\DataTransferObject\Exceptions\DataTransferException;
+use IsakzhanovR\DataTransferObject\Exceptions\TypeErrorException;
+use IsakzhanovR\DataTransferObject\Exceptions\UnknownTypePropertyException;
+use IsakzhanovR\DataTransferObject\Helpers\Types;
+use IsakzhanovR\DataTransferObject\Traits\StaticDTO;
 use IsakzhanovR\ValueObject\ValueObject;
 use ReflectionClass;
 use ReflectionProperty;
@@ -83,7 +83,7 @@ abstract class DataTransferObject implements Arrayable
      * @param $value
      *
      * @return object
-     * @throws \IsakzhanovR\DataTransferObjects\Exceptions\UnknownTypePropertyException
+     * @throws \IsakzhanovR\DataTransferObject\Exceptions\UnknownTypePropertyException
      */
     private function typed(ReflectionProperty $property, $value)
     {

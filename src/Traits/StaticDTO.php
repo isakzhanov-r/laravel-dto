@@ -1,7 +1,7 @@
 <?php
 
 
-namespace IsakzhanovR\DataTransferObjects\Traits;
+namespace IsakzhanovR\DataTransferObject\Traits;
 
 
 use Illuminate\Http\Request;

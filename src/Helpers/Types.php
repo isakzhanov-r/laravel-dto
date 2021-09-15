@@ -1,6 +1,6 @@
 <?php
 
-namespace IsakzhanovR\DataTransferObjects\Helpers;
+namespace IsakzhanovR\DataTransferObject\Helpers;
 
 class Types
 {

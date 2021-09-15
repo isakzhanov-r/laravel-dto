@@ -1,6 +1,6 @@
 <?php
 
-namespace IsakzhanovR\DataTransferObjects\Exceptions;
+namespace IsakzhanovR\DataTransferObject\Exceptions;
 
 use Exception;
 use Illuminate\Support\Arr;
