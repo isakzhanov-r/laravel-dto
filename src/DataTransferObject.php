@@ -3,19 +3,13 @@
 
 namespace IsakzhanovR\DataTransferObject;
 
-
-use Exception;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
-use IsakzhanovR\DataTransferObject\Exceptions\DataTransferException;
-use IsakzhanovR\DataTransferObject\Exceptions\TypeErrorException;
-use IsakzhanovR\DataTransferObject\Exceptions\UnknownTypePropertyException;
-use IsakzhanovR\DataTransferObject\Helpers\Types;
+use Illuminate\Support\Str;
+use IsakzhanovR\DataTransferObject\Helpers\DocBlock;
+use IsakzhanovR\DataTransferObject\Services\ResolveClass;
 use IsakzhanovR\DataTransferObject\Traits\StaticDTO;
-use IsakzhanovR\ValueObject\ValueObject;
 use ReflectionClass;
-use ReflectionProperty;
 
 abstract class DataTransferObject implements Arrayable
 {
@@ -27,12 +21,20 @@ abstract class DataTransferObject implements Arrayable
 
     public function __construct(array $args)
     {
-        $reflection = new ReflectionClass($this);
+        $class = new ResolveClass($this);
 
-        foreach ($args as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->setValue($reflection->getProperty($key), $value);
+        foreach ($class->getProperties() as $property) {
+
+            $value = Arr::get($args, $property->name);
+            if ($docblock = $property->getDocComment()) {
+                $type = $this->annotationType($docblock);
+
+                if (Str::endsWith($type, '[]')) {
+                    $type  = str_replace('[]', '', $type);
+                    $value = $this->resolveValues($class, $value, $type);
+                }
             }
+            $class->setValue($property, $value);
         }
     }
 
@@ -43,12 +45,10 @@ abstract class DataTransferObject implements Arrayable
     {
         $data = [];
 
-        $class = new ReflectionClass(static::class);
+        $class = new ResolveClass(static::class);
 
-        $properties = $this->properties($class);
-
-        foreach ($properties as $property) {
-            $data[$property->getName()] = $property->getValue($this);
+        foreach ($class->getProperties() as $property) {
+            $data[$property->getName()] = $this->expandObject($property->getValue($this));
         }
 
         if (count($this->only)) {
@@ -78,68 +78,39 @@ abstract class DataTransferObject implements Arrayable
         return $clone;
     }
 
-    /**
-     * @param \ReflectionProperty $property
-     * @param $value
-     *
-     * @return object
-     * @throws \IsakzhanovR\DataTransferObject\Exceptions\UnknownTypePropertyException
-     */
-    private function typed(ReflectionProperty $property, $value)
+    protected function annotationType(string $docblock)
     {
-        if (!$property->hasType() || Types::has($property->getType()->getName())) {
-            return $value;
-        }
+        $parameters = DocBlock::parse($docblock);
+        $parameter  = DocBlock::get('var', $parameters);
 
-        if (class_exists($class = $property->getType()->getName())) {
-            $class = new ReflectionClass($class);
+        /**
+         * @var $type
+         */
+        extract($parameter);
 
-            if ($class->isSubclassOf(ValueObject::class)) {
-                return $class->newInstance($value, $property->getName());
-            }
-
-            if ($class->isSubclassOf(DataTransferObject::class)) {
-                $value = $this->valueToDTO($value);
-
-                return $class->newInstance($value);
-            }
-        }
-
-        throw new UnknownTypePropertyException($this, $property->getType()->getName(), $property->getName(), ValueObject::class, DataTransferObject::class);
-
+        return trim($type);
     }
 
-    private function valueToDTO($value)
+    protected function resolveValues(ResolveClass $class, $args, $type)
     {
-        if (is_object($value)) {
-            return get_object_vars($value);
-        } elseif (is_array($value)) {
-            return $value;
+        $values = [];
+
+        foreach ($args as $value) {
+            array_push($values, $class->typed($type, $value));
         }
 
-        throw new TypeErrorException('Argument for DTO mast be array');
+        return $values;
     }
 
-    private function properties(ReflectionClass $reflection)
+    protected function expandObject($value)
     {
-        return array_filter(
-            $reflection->getProperties(ReflectionProperty::IS_PUBLIC),
-            fn(ReflectionProperty $property) => !$property->isStatic()
-        );
-    }
-
-    private function setValue(ReflectionProperty $property, $value)
-    {
-        try {
-            $property->setAccessible(true);
-            $property->setValue($this, $this->typed($property, $value));
-        } catch (UnknownTypePropertyException $exception) {
-            throw $exception;
-        } catch (ValidationException $exception) {
-            $messages = Arr::flatten(array_values($exception->errors()));
-            throw new DataTransferException($this, $property->getType()->getName(), $property->getName(), $value, $messages);
-        } catch (Exception $exception) {
-            throw new DataTransferException($this, $property->getType()->getName(), $property->getName(), $value, $exception->getMessage());
+        if (is_object($value) && (new ReflectionClass(get_class($value)))->implementsInterface(Arrayable::class)) {
+            $value = $value->toArray();
         }
+        if (is_array($value)) {
+            return array_map(fn($item) => $this->expandObject($item), $value);
+        }
+
+        return $value;
     }
 }
