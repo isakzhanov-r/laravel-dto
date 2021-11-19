@@ -48,7 +48,12 @@ class UserData extends DataTransferObject
     
     public string $name;
     
-    public Email $email
+    public Email $email;
+    
+    /**
+    * @var IsakzhanovR\DataTransferObject\FiledDTO[] - example
+    */
+    public array $fields;
 }
 ```
 
