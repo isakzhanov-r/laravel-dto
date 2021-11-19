@@ -10,9 +10,8 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "ext-pdo": "*",
         "ext-json": "*",
-        "isakzhanov-r/laravel-value-object": "^1.0",
+        "ext-pdo": "*",
         "illuminate/support": "^7.0|^8.0"
     },
     "require-dev": {
@@ -23,6 +22,11 @@
     "autoload": {
         "psr-4": {
             "IsakzhanovR\\DataTransferObject\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     },
     "config": {
