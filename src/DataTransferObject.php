@@ -10,6 +10,7 @@ use IsakzhanovR\DataTransferObject\Helpers\DocBlock;
 use IsakzhanovR\DataTransferObject\Services\ResolveClass;
 use IsakzhanovR\DataTransferObject\Traits\StaticDTO;
 use ReflectionClass;
+use ReflectionProperty;
 
 abstract class DataTransferObject implements Arrayable
 {
@@ -24,16 +25,10 @@ abstract class DataTransferObject implements Arrayable
         $class = new ResolveClass($this);
 
         foreach ($class->getProperties() as $property) {
+            $value = Arr::get($args, $property->name) ?? $this->{$property->name} ?? null;
 
-            $value = Arr::get($args, $property->name);
-            if ($docblock = $property->getDocComment()) {
-                $type = $this->annotationType($docblock);
+            $this->findDocblock($class, $property, $value);
 
-                if (Str::endsWith($type, '[]')) {
-                    $type  = str_replace('[]', '', $type);
-                    $value = $this->resolveValues($class, $value, $type);
-                }
-            }
             $class->setValue($property, $value);
         }
     }
@@ -89,6 +84,18 @@ abstract class DataTransferObject implements Arrayable
         extract($parameter);
 
         return trim($type);
+    }
+
+    protected function findDocblock(ResolveClass $class, ReflectionProperty $property, &$value)
+    {
+        if ($docblock = $property->getDocComment()) {
+            $type = $this->annotationType($docblock);
+
+            if (Str::endsWith($type, '[]')) {
+                $type  = str_replace('[]', '', $type);
+                $value = $this->resolveValues($class, $value, $type);
+            }
+        }
     }
 
     protected function resolveValues(ResolveClass $class, $args, $type)
