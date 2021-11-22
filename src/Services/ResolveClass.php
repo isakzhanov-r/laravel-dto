@@ -22,6 +22,11 @@ class ResolveClass
         $this->reflection = new ReflectionClass($class);
     }
 
+    public function getProperty(string $name)
+    {
+        return $this->reflection->getProperty($name);
+    }
+
     /**
      * @return \ReflectionProperty[]
      */
