@@ -15,13 +15,6 @@
         <env name="APP_KEY" value="AckfSECXIvnK5r28GVIWUAxmbBSjTsmF"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_DEBUG" value="true"/>
-
-        <env name="DB_CONNECTION" value="mysql"/>
-        <env name="DB_HOST" value="mysql"/>
-        <env name="DB_PORT" value="3306"/>
-        <env name="DB_DATABASE" value="testbench"/>
-        <env name="DB_USERNAME" value="root"/>
-        <env name="DB_PASSWORD" value="secret"/>
     </php>
     <testsuites>
         <testsuite name="Test Suite">
