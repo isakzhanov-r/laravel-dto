@@ -80,6 +80,22 @@ $dto = UserData::fromJson(json_encode($array));
 
 ```
 
+It also happens that you need to reverse transformation into an array , for this there is a `get` method:
+
+```php
+
+$dto->get()
+
+```
+
+or a method with recursive transformation into an array
+
+```php
+
+$dto->toArray()
+
+```
+
 ## License
 
 This package is released under the [MIT License](LICENSE).

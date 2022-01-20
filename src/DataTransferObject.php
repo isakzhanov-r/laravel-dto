@@ -33,17 +33,14 @@ abstract class DataTransferObject implements Arrayable
         }
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function get()
     {
         $data = [];
 
         $class = new ResolveClass(static::class);
 
         foreach ($class->getProperties() as $property) {
-            $data[$property->getName()] = $this->expandObject($property->getValue($this));
+            $data[$property->getName()] = $property->getValue($this);
         }
 
         if (count($this->only)) {
@@ -53,6 +50,14 @@ abstract class DataTransferObject implements Arrayable
         }
 
         return $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return array_map([$this, 'expandObject'], $this->get());
     }
 
     public function only(string ...$keys): self
