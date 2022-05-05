@@ -78,6 +78,10 @@ class ResolveClass
         if (class_exists($type)) {
             $class = new ReflectionClass($type);
 
+            if ($class->isInstance($value)) {
+                return $value;
+            }
+
             return $class->newInstance($value);
         }
     }
