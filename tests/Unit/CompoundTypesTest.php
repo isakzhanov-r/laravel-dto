@@ -56,7 +56,7 @@ class CompoundTypesTest extends TestCase
 
         $dto = $this->createDTOClass($data);
 
-        $this->assertEquals($dto->title->value(), null);
+        $this->assertEquals($dto->title, null);
     }
 
     protected function createDTOClass(array $args)
