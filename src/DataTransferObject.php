@@ -28,8 +28,9 @@ abstract class DataTransferObject implements Arrayable
             $value = Arr::get($args, $property->name) ?? $this->{$property->name} ?? null;
 
             $this->findDocblock($class, $property, $value);
+            $throws = $this->anotationThrows($property->getDocComment());
 
-            $class->setValue($property, $value);
+            $class->setValue($property, $value, $throws);
         }
     }
 
@@ -82,6 +83,19 @@ abstract class DataTransferObject implements Arrayable
     {
         $parameters = DocBlock::parse($docblock);
         $parameter  = DocBlock::get('var', $parameters);
+
+        /**
+         * @var $type
+         */
+        extract($parameter);
+
+        return trim($type);
+    }
+
+    protected function anotationThrows(string $docblock)
+    {
+        $parameters = DocBlock::parse($docblock);
+        $parameter  = DocBlock::get('throws', $parameters);
 
         /**
          * @var $type

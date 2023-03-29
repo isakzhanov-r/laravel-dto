@@ -48,6 +48,10 @@ class UserData extends DataTransferObject
     
     public string $name;
     
+    /**
+    * @var \IsakzhanovR\ValueObject\Email
+    * @throws \App\Exceptions\EmailDataExeption
+    */
     public Email $email;
     
     /**

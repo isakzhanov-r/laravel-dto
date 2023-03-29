@@ -56,9 +56,10 @@ class ResolveClass
      *
      * @return void
      * @throws \IsakzhanovR\DataTransferObject\Exceptions\DataTransferException
+     * @throws \IsakzhanovR\DataTransferObject\Exceptions\PropertyException
      * @throws \IsakzhanovR\DataTransferObject\Exceptions\TypeErrorException
      */
-    public function setValue(ReflectionProperty $property, $value): void
+    public function setValue(ReflectionProperty $property, $value, string $throw = ""): void
     {
         try {
             $method = 'set' . Str::ucfirst($property->name);
@@ -76,7 +77,11 @@ class ResolveClass
         } catch (TypeErrorException $exception) {
             throw $exception;
         } catch (Exception $exception) {
-            throw new DataTransferException($this, $type, $property->getName(), $value, $exception->getMessage());
+            if ($throw) {
+                throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
+            } else {
+                throw new DataTransferException($this, $type, $property->getName(), $value, $exception->getMessage());
+            }
         }
     }
 
