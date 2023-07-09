@@ -4,6 +4,7 @@ namespace IsakzhanovR\DataTransferObject\Services;
 
 use Exception;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use IsakzhanovR\DataTransferObject\Exceptions\DataTransferException;
 use IsakzhanovR\DataTransferObject\Exceptions\TypeErrorException;
 use IsakzhanovR\DataTransferObject\Helpers\Types;
@@ -63,25 +64,35 @@ class ResolveClass
     {
         try {
             $method = 'set' . Str::ucfirst($property->name);
+            $type   = $property->hasType() ? $this->propertyType($property) : '';
 
             switch (true) {
                 case method_exists($this->class, $method):
-                    $property->setValue($this->class, $this->class->$method($value));
+                    $reflectionMethod = $this->reflection->getMethod($method);
+                    //$reflectionMethod->setAccessible(true);
+                    $property->setValue($this->class, $reflectionMethod->invoke($this->class, $value));
                     break;
                 default:
-                    $type = $property->hasType() ? $this->propertyType($property) : '';
                     $property->setValue($this->class, $this->typed($type, $value));
                     break;
             }
 
         } catch (TypeErrorException $exception) {
+            if ($throw) {
+                throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
+            }
+            throw $exception;
+        } catch (ValidationException $exception) {
+            if ($throw) {
+                throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
+            }
             throw $exception;
         } catch (Exception $exception) {
             if ($throw) {
                 throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
-            } else {
-                throw new DataTransferException($this, $type, $property->getName(), $value, $exception->getMessage());
             }
+            throw new DataTransferException($this, $type, $property->getName(), $value, $exception->getMessage());
+
         }
     }
 
