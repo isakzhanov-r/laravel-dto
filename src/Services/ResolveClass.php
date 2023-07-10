@@ -13,6 +13,7 @@ use ReflectionException;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
+use TypeError;
 
 class ResolveClass
 {
@@ -69,7 +70,6 @@ class ResolveClass
             switch (true) {
                 case method_exists($this->class, $method):
                     $reflectionMethod = $this->reflection->getMethod($method);
-                    //$reflectionMethod->setAccessible(true);
                     $property->setValue($this->class, $reflectionMethod->invoke($this->class, $value));
                     break;
                 default:
@@ -77,12 +77,9 @@ class ResolveClass
                     break;
             }
 
-        } catch (TypeErrorException $exception) {
-            if ($throw) {
-                throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
-            }
-            throw $exception;
-        } catch (ValidationException $exception) {
+        } catch (TypeError) {
+            throw new TypeErrorException();
+        } catch (TypeErrorException|ValidationException $exception) {
             if ($throw) {
                 throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
             }
@@ -92,7 +89,6 @@ class ResolveClass
                 throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);
             }
             throw new DataTransferException($this, $type, $property->getName(), $value, $exception->getMessage());
-
         }
     }
 
