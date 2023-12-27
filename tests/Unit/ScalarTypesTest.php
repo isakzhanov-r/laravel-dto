@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use IsakzhanovR\DataTransferObject\DataTransferObject;
+use IsakzhanovR\DataTransferObject\Exceptions\TypeErrorException;
 use PHPUnit\Framework\TestCase;
-use TypeError;
 
 class ScalarTypesTest extends TestCase
 {
@@ -33,7 +33,7 @@ class ScalarTypesTest extends TestCase
             'foo'     => 'is undeclared',
         ]);
 
-        $this->assertObjectNotHasAttribute('foo', $dto);
+        $this->assertFalse(property_exists($dto, 'foo'));
     }
 
     public function testDefaultValues()
@@ -55,8 +55,9 @@ class ScalarTypesTest extends TestCase
                 'content' => 'This is content',
                 'meta'    => 'Any field',
             ]);
-        } catch (TypeError $exception) {
-            self::assertEquals('Typed property class@anonymous::$title must be string, null used', $exception->getMessage());
+        } catch (TypeErrorException $exception) {
+            self::assertEquals('TypeError: Cannot assign null to property IsakzhanovR\DataTransferObject\DataTransferObject@anonymous::$title of type string',
+                $exception->getMessage());
         }
     }
 

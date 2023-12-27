@@ -65,7 +65,7 @@ class ClassTypesTest extends TestCase
         ];
 
         $dto = $this->createDTOClass($data)->only('collection')->toArray();
-
+        dd($dto);
         $this->assertEquals($dto, ["collection" => ["qwerty", "tests", "title"]]);
     }
 

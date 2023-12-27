@@ -77,8 +77,8 @@ class ResolveClass
                     break;
             }
 
-        } catch (TypeError) {
-            throw new TypeErrorException();
+        } catch (TypeError $exception) {
+            throw new TypeErrorException($exception->getMessage());
         } catch (TypeErrorException|ValidationException $exception) {
             if ($throw) {
                 throw new $throw($exception, $this->class::class, $type, $property->getName(), $value);

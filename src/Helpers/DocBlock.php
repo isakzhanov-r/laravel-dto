@@ -20,7 +20,7 @@ class DocBlock
     {
         $doc      = Arr::get($parameters, $name);
         $property = '';
-        $var      = explode(' ', $doc);
+        $var = explode(' ', $doc ?? '');
 
         $type = $var[0];
         unset($var[0]);
